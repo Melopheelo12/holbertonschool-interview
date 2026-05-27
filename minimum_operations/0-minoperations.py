@@ -11,13 +11,13 @@ def minOperations(n):
     Returns:
             int: min number
     """
-    if not isinstance(n, int) or n < 2:
+    if n <= 1:
         return 0
 
     operations = 0
     facteur = 2
 
-    while n < 1:
+    while n > 1:
         while n % facteur == 0:
             operations += facteur
             n //= facteur
