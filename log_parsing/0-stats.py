@@ -10,10 +10,11 @@ import sys
 def print_stats(total_size, status_codes):
     """
     Print accumulated metrics.
-    
+
     Args:
         total_size (int): Total accumulated file size
-        status_codes (dict): Dictionary with status codes as keys and counts as values
+        status_codes (dict): Dictionary with status codes
+        as keys and counts as values
     """
     print("File size: {}".format(total_size))
 
@@ -51,7 +52,7 @@ def main():
 
             try:
                 # Split the line and extract status code and file size
-                # Status code is second-to-last element, file size is last element
+                # Status code is second-to-last element
                 parts = line.split()
                 status = int(parts[-2])
                 file_size = int(parts[-1])
