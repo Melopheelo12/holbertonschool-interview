@@ -1,24 +1,22 @@
 #!/usr/bin/python3
 """
-Log Parser - Reads and processes HTTP request log data from stdin.
-Accumulates file sizes and HTTP status code counts.
-Prints statistics every 10 lines and on keyboard interrupt.
+Parseur de logs HTTP - lit stdin, accumule tailles et codes de statut.
+Affiche les stats toutes les 10 lignes et à l'interruption clavier.
 """
 import sys
+import re
 
 
 def print_stats(total_size, status_codes):
     """
-    Print accumulated metrics.
-
+    Affiche les métriques accumulées.
     Args:
-        total_size (int): Total accumulated file size
-        status_codes (dict): Dictionary with status codes
-        as keys and counts as values
+        total_size (int): Taille totale des fichiers
+        status_codes (dict): Codes HTTP et leurs occurrences
     """
     print("File size: {}".format(total_size))
 
-    # Print status codes in sorted order
+    # Codes triés, on n'affiche que ceux > 0
     for code in sorted(status_codes.keys()):
         if status_codes[code] > 0:
             print("{}: {}".format(code, status_codes[code]))
@@ -26,57 +24,54 @@ def print_stats(total_size, status_codes):
 
 def main():
     """
-    Main function that processes HTTP log lines from stdin.
-    Accumulates total file size and counts HTTP status codes.
-    Outputs statistics every 10 lines and on keyboard interrupt.
+    Lit les logs depuis stdin et affiche les stats
+    toutes les 10 lignes ou sur interruption clavier.
     """
     total_size = 0
     line_count = 0
 
-    # Initialize dictionary with all expected HTTP status codes
+    # Regex correspondant au format attendu
+    pattern = re.compile(
+        r'^\d+\.\d+\.\d+\.\d+ - \[.+\] "GET /projects/260 HTTP/1\.1" \d+ \d+$'
+    )
+
+    # Codes HTTP attendus
     status_codes = {
-        200: 0,
-        301: 0,
-        400: 0,
-        401: 0,
-        403: 0,
-        404: 0,
-        405: 0,
-        500: 0
+        200: 0, 301: 0, 400: 0, 401: 0,
+        403: 0, 404: 0, 405: 0, 500: 0
     }
 
     try:
-        # Process each line from stdin
         for line in sys.stdin:
+            line = line.strip()
+
+            # Ligne ignorée si le format ne correspond pas
+            if not pattern.match(line):
+                continue
+
             line_count += 1
 
             try:
-                # Split the line and extract status code and file size
-                # Status code is second-to-last element
+                # Avant-dernier = code, dernier = taille
                 parts = line.split()
                 status = int(parts[-2])
                 file_size = int(parts[-1])
 
-                # Accumulate the file size
                 total_size += file_size
 
-                # Count the status code if it's in our tracked codes
                 if status in status_codes:
                     status_codes[status] += 1
 
             except (ValueError, IndexError):
-                # Skip lines that can't be parsed
                 continue
 
-            # Print statistics every 10 lines
             if line_count % 10 == 0:
                 print_stats(total_size, status_codes)
 
     except KeyboardInterrupt:
-        # Handle Ctrl+C gracefully by printing final stats
+        # Ctrl+C : affichage des stats finales
         print_stats(total_size, status_codes)
 
 
-# Entry point of the script
 if __name__ == "__main__":
     main()
