@@ -43,8 +43,8 @@ def main():
             except (ValueError, IndexError):
                 continue
 
-            if line_count % 10 == 0:
-                print_stats(total_size, status_codes)
+        if line_count % 10 == 0:
+            print_stats(total_size, status_codes)
 
     except KeyboardInterrupt:
         print_stats(total_size, status_codes)
